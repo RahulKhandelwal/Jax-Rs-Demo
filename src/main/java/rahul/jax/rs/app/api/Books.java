@@ -8,12 +8,8 @@ package rahul.jax.rs.app.api;
 
 import java.util.Collection;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.inject.*;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
@@ -22,6 +18,8 @@ import javax.ws.rs.core.UriInfo;
 
 import rahul.jax.rs.app.resources.Book;
 import rahul.jax.rs.app.resources.BookDao;
+import rahul.jax.rs.app.security.Roles;
+import rahul.jax.rs.app.security.Secured;
 
 /**
  * This class is endpoint for book resources.
@@ -30,6 +28,9 @@ import rahul.jax.rs.app.resources.BookDao;
  */
 @Path("books")
 public class Books {
+    
+    @Inject
+    private BookDao bookDao; 
 
     @Context
     private UriInfo uriInfo;
@@ -37,7 +38,7 @@ public class Books {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response listAll() {
-        GenericEntity<Collection<Book>> books = new GenericEntity<Collection<Book>>(BookDao.INSTANCE.all()){};
+        GenericEntity<Collection<Book>> books = new GenericEntity<Collection<Book>>(this.bookDao.all()){};
         return Response.ok(books).build();
     }
 
@@ -45,19 +46,28 @@ public class Books {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response book(@PathParam("id") int _id) {
-        return Response.ok(BookDao.INSTANCE.get(_id)).build();
+        return Response.ok(this.bookDao.get(_id)).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(Book book) {
-        Book added = BookDao.INSTANCE.add(book);
+        Book added = this.bookDao.add(book);
         String id = String.valueOf(added.getId());
         
-        return Response.ok(added).
-                link(uriInfo.getAbsolutePathBuilder().path(id).build(), "self").
-                build();
+        return Response.ok(added)
+                .link(uriInfo.getAbsolutePathBuilder().path(id).build(), "self")
+                .link(uriInfo.getAbsolutePathBuilder().path(id).build(), "delete")
+                .build();
     }
-
+    
+    @Secured({Roles.ADMIN, Roles.NORMAL})
+    @DELETE
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delete(@PathParam("id") int _id) {
+        Book removed = this.bookDao.remove(_id);
+        return Response.ok(removed).build();
+    }
 }
