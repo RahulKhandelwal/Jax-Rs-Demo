@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
 import rahul.jax.rs.app.security.Roles;
@@ -32,6 +33,14 @@ public class Resource {
             asyncResponse.resume("This is response form thread : " + Thread.currentThread().getName());
         });
         async.start();
+    }
+
+    @GET
+    @Path("cached")
+    public Response getCached() {
+        CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge(60);
+        return Response.ok("This is cached resource").cacheControl(cacheControl).build();
     }
 
     @GET

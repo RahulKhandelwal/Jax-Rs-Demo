@@ -24,7 +24,7 @@ public class Token {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        return Response.status(Response.Status.OK).entity(Roles.getRole(_role).getRole()).build();
+        return Response.status(Response.Status.CREATED).entity(Roles.getRole(_role).getRole()).build();
     }
 
 }
