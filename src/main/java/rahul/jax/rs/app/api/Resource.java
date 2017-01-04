@@ -7,6 +7,8 @@ package rahul.jax.rs.app.api;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 
 import rahul.jax.rs.app.security.Roles;
@@ -21,6 +23,15 @@ public class Resource {
     @GET
     public Response get() {
         return Response.ok("This is an unsecured resource").build();
+    }
+
+    @GET
+    @Path("async")
+    public void getAsync(@Suspended final AsyncResponse asyncResponse) {
+        Thread async  = new Thread(() -> {
+            asyncResponse.resume("This is response form thread : " + Thread.currentThread().getName());
+        });
+        async.start();
     }
 
     @GET

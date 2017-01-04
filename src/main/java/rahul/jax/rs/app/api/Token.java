@@ -6,7 +6,7 @@
 package rahul.jax.rs.app.api;
 
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
@@ -18,8 +18,8 @@ import rahul.jax.rs.app.security.Roles;
 @Path("token")
 public class Token {
 
-    @GET
-    public Response get(@FormParam("role") String _role) {
+    @POST
+    public Response create(@FormParam("role") String _role) {
         if (_role == null || Roles.getRole(_role) == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
